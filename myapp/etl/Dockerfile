@@ -9,10 +9,12 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /etl
 
 # Copy requirements file and install dependencies
-#COPY requirements.txt .
-#RUN pip3 install --upgrade pip
-#RUN pip3 install -r requirements.txt
+COPY requirements.txt .
+RUN pip3 install --upgrade pip
+RUN pip3 install -r requirements.txt
 
+# Set Python path to recognize etl as a package
+ENV PYTHONPATH=/etl
 # Copy the rest of the application code
 COPY . .
 

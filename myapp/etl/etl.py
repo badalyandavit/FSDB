@@ -1,9 +1,9 @@
 import pandas as pd
 from loguru import logger
 import random
-from myapp.etl.Database.models import *
-from myapp.etl.Database.database import engine, Base
-from myapp.etl.Database.data_generator import (
+from Database.models import *
+from Database.database import engine, Base
+from Database.data_generator import (
     generate_employee,
     generate_customer,
     generate_account,
@@ -83,19 +83,26 @@ logger.info(f"Risk Assessment data saved to CSV: {risk_assessments.shape}")
 
 
 def load_csv_to_table(table_name: str, csv_path: str) -> None:
-    """
-    Load data from a CSV file into a database table.
-
-    Parameters:
-        - table_name (str): The name of the database table.
-        - csv_path (str): The path to the CSV file containing data.
-
-    Returns:
-        None
-    """
     df = pd.read_csv(csv_path)
+
+    # Rename columns based on the table
+    if table_name == "employees":
+        df = df.rename(columns={"employee_id": "id"})
+    elif table_name == "customers":
+        # For demo purposes, we assign customer_name to first_name (you might split it properly)
+        df = df.rename(columns={"customer_id": "id", "customer_name": "first_name"})
+    elif table_name == "accounts":
+        df = df.rename(columns={"account_id": "id", "open_date": "opened_date"})
+    elif table_name == "transactions":
+        df = df.rename(columns={"transaction_id": "id", "transaction_date": "date"})
+    elif table_name == "loans":
+        df = df.rename(columns={"loan_id": "id"})
+    elif table_name == "risk_assessments":
+        df = df.rename(columns={"risk_id": "id"})
+
+    # Insert data into the database table; note that the table must already exist.
     df.to_sql(table_name, con=engine, if_exists="append", index=False)
-    logger.info(f"Loading data into table: {table_name}")
+    logger.info(f"Loaded data into table: {table_name}")
 
 
 # Get all CSV file paths in the data folder
